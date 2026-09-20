@@ -1,0 +1,15 @@
+{
+  "name": "aplikasi-audit-wcag",
+  "version": "1.0.0",
+  "description": "Platform Audit Aksesibilitas Web Otomatis Berdasarkan Standar WCAG 2.1 untuk Tugas Akhir Adriel Gerald L. Tobing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cheerio": "^1.0.0-rc.12",
+    "axios": "^1.7.2",
+    "cors": "^2.8.5"
+  }
+}

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A11yAuditor AI - Suite Evaluasi Aksesibilitas Web (WCAG 2.1 & POUR Engine)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- SVG FILTER MATRIKS WARNA RESMI INTERNASIONAL -->
+    <svg style="display: none;">
+        <defs>
+            <filter id="protanopia">
+                <feColorMatrix type="matrix" values="0.567, 0.433, 0, 0, 0   0.558, 0.442, 0, 0, 0   0, 0.242, 0.758, 0, 0   0, 0, 0, 1, 0"/>
+            </filter>
+            <filter id="deuteranopia">
+                <feColorMatrix type="matrix" values="0.625, 0.375, 0, 0, 0   0.7, 0.3, 0, 0, 0   0, 0.3, 0.7, 0, 0   0, 0, 0, 1, 0"/>
+            </filter>
+            <filter id="tritanopia">
+                <feColorMatrix type="matrix" values="0.95, 0.05, 0, 0, 0   0, 0.433, 0.567, 0, 0   0, 0.475, 0.525, 0, 0   0, 0, 0, 1, 0"/>
+            </filter>
+            <filter id="achromatopsia">
+                <feColorMatrix type="matrix" values="0.299, 0.587, 0.114, 0, 0   0.299, 0.587, 0.114, 0, 0   0.299, 0.587, 0.114, 0, 0   0, 0, 0, 1, 0"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo">
+                <span class="logo-icon">🌐</span>
+                <div>
+                    <span class="logo-title">A11yAuditor AI</span>
+                    <span class="logo-badge">WCAG 2.1 • W3C POUR Framework</span>
+                </div>
+            </div>
+            <div class="nav-author">
+                <span class="univ-tag">TUGAS AKHIR TEKNIK INFORMATIKA</span>
+                <strong class="author-name">Adriel Gerald L. Tobing</strong>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <!-- HERO SECTION -->
+        <section class="hero-section">
+            <div class="container hero-container">
+                <div class="tag-pill-container">
+                    <span class="tag-pill">🚀 Automated Web Accessibility Suite & Vision Simulator</span>
+                </div>
+                <h1 class="hero-title">Audit Aksesibilitas Web Otomatis</h1>
+                <p class="hero-subtitle">
+                    Platform pengujian kepatuhan situs layanan publik terhadap standar internasional <strong>W3C WCAG 2.1 (Level A, AA, AAA)</strong>. Menginspeksi struktur pohon DOM, menghitung rasio luminansi kontras warna, dan membedah kepatuhan 4 pilar aksesibilitas <strong>P.O.U.R</strong> secara mendalam.
+                </p>
+
+                <div class="audit-card">
+                    <form id="auditForm" class="audit-form">
+                        <div class="input-wrapper">
+                            <span class="input-icon">🔍</span>
+                            <input type="text" id="urlInput" placeholder="Masukkan URL situs web (contoh: wikipedia.org atau bps.go.id)" required>
+                        </div>
+                        <button type="submit" id="btnAudit" class="btn-primary">
+                            <span id="btnText">Jalankan Audit P.O.U.R</span>
+                            <span id="btnLoader" class="loader-spinner" style="display: none;"></span>
+                        </button>
+                    </form>
+                    <div class="quick-samples">
+                        <span>Pilih sampel cepat untuk diuji:</span>
+                        <div class="sample-tags">
+                            <button class="sample-btn" data-url="usu.ac.id">🎓 USU Medan (Kampus)</button>
+                            <button class="sample-btn" data-url="https://ui.ac.id">🎓 Univ. Indonesia</button>
+                            <button class="sample-btn" data-url="https://itb.ac.id">🎓 ITB Bandung</button>
+                            <button class="sample-btn" data-url="https://kemkes.go.id">🏥 Kemkes RI</button>
+                            <button class="sample-btn" data-url="https://bps.go.id">📊 BPS RI</button>
+                            <button class="sample-btn" data-url="https://kompas.com">📰 Kompas.com</button>
+                            <button class="sample-btn" data-url="https://detik.com">📰 Detik.com</button>
+                            <button class="sample-btn" data-url="https://wikipedia.org">📚 Wikipedia</button>
+                            <button class="sample-btn" data-url="https://w3.org">🌐 W3C Official</button>
+                            <button class="sample-btn" data-url="https://github.com">💻 GitHub</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AREA HASIL AUDIT -->
+        <section id="resultSection" class="result-section" style="display: none;">
+            <div class="container">
+                
+                <!-- HEADER LAPORAN EKSEKUTIF -->
+                <div class="report-header card">
+                    <div class="report-info">
+                        <div class="badge-row">
+                            <span class="report-badge">Hasil Evaluasi Audit Selesai</span>
+                            <span id="conformanceBadge" class="conformance-badge">Level AA</span>
+                        </div>
+                        <h2 id="targetUrlDisplay" class="target-url">-</h2>
+                        <p id="executiveSummary" class="executive-summary">-</p>
+                        <div class="audit-meta">
+                            <span>🕒 Waktu Pengujian: <strong id="auditTime">-</strong></span>
+                            <span>📦 Total Elemen DOM: <strong id="totalElements">-</strong></span>
+                            <span>👨‍💻 Penguji: <strong>Adriel Gerald L. Tobing</strong></span>
+                        </div>
+                    </div>
+                    <div class="score-box" id="scoreBox">
+                        <div class="score-circle">
+                            <span id="scoreNumber" class="score-number">0</span>
+                            <span class="score-max">/100</span>
+                        </div>
+                        <div class="score-details">
+                            <span id="gradeBadge" class="grade-badge">Grade A</span>
+                            <span class="engine-badge">Engine v3.0 AI</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🌟 ANALISIS 4 PILAR WCAG RESMI (P.O.U.R) -->
+                <div class="card pour-card">
+                    <div class="section-head">
+                        <span class="badge-feature">🏛️ Fondasi Standar Dunia W3C</span>
+                        <h3>Indeks Kepatuhan 4 Prinsip Dasar WCAG (P.O.U.R)</h3>
+                        <p class="section-caption">Evaluasi kepatuhan pada 4 pilar resmi: Perceivable, Operable, Understandable, dan Robust.</p>
+                    </div>
+                    <div class="pour-grid">
+                        <div class="pour-item">
+                            <div class="pour-item-header">
+                                <span class="pour-letter">P</span>
+                                <div>
+                                    <h4>Perceivable</h4>
+                                    <small>Dapat Diindera (Alt, Kontras, Warna)</small>
+                                </div>
+                                <span id="pourPVal" class="pour-pct">0%</span>
+                            </div>
+                            <div class="progress-bar-bg"><div id="pourPBar" class="progress-bar-fill" style="width: 0%;"></div></div>
+                        </div>
+                        <div class="pour-item">
+                            <div class="pour-item-header">
+                                <span class="pour-letter">O</span>
+                                <div>
+                                    <h4>Operable</h4>
+                                    <small>Dapat Dioperasikan (Navigasi Keyboard, Link)</small>
+                                </div>
+                                <span id="pourOVal" class="pour-pct">0%</span>
+                            </div>
+                            <div class="progress-bar-bg"><div id="pourOBar" class="progress-bar-fill" style="width: 0%;"></div></div>
+                        </div>
+                        <div class="pour-item">
+                            <div class="pour-item-header">
+                                <span class="pour-letter">U</span>
+                                <div>
+                                    <h4>Understandable</h4>
+                                    <small>Dapat Dipahami (Bahasa, Tag Judul Halaman)</small>
+                                </div>
+                                <span id="pourUVal" class="pour-pct">0%</span>
+                            </div>
+                            <div class="progress-bar-bg"><div id="pourUBar" class="progress-bar-fill" style="width: 0%;"></div></div>
+                        </div>
+                        <div class="pour-item">
+                            <div class="pour-item-header">
+                                <span class="pour-letter">R</span>
+                                <div>
+                                    <h4>Robust</h4>
+                                    <small>Kuat & Kompatibel (Struktur DOM, Label Form)</small>
+                                </div>
+                                <span id="pourRVal" class="pour-pct">0%</span>
+                            </div>
+                            <div class="progress-bar-bg"><div id="pourRBar" class="progress-bar-fill" style="width: 0%;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🌟 SIMULATOR PENGLIHATAN REAL-TIME -->
+                <div class="simulator-card card">
+                    <div class="simulator-header">
+                        <div>
+                            <span class="badge-feature">👁️ Simulator Penglihatan Interaktif</span>
+                            <h3 class="simulator-title">Simulasi Tampilan Sudut Pandang Penyandang Disabilitas</h3>
+                            <p class="simulator-desc">
+                                Uji bagaimana website target tampak bagi penyandang gangguan buta warna parsial, monokrom, dan katarak lansia:
+                            </p>
+                        </div>
+                        <div class="vision-buttons">
+                            <button class="v-btn active" data-filter="normal">Normal</button>
+                            <button class="v-btn" data-filter="protanopia">Protanopia (Buta Merah)</button>
+                            <button class="v-btn" data-filter="deuteranopia">Deuteranopia (Buta Hijau)</button>
+                            <button class="v-btn" data-filter="tritanopia">Tritanopia (Buta Biru)</button>
+                            <button class="v-btn" data-filter="achromatopsia">Monokrom (Total)</button>
+                            <button class="v-btn" data-filter="blur">Lansia (Katarak/Kabur)</button>
+                        </div>
+                    </div>
+                    <div class="iframe-container">
+                        <div class="simulator-status-bar">
+                            <span>Mode Simulasi Aktif: <strong id="activeVisionMode">Penglihatan Normal</strong></span>
+                            <div class="simulator-controls">
+                                <button id="btnReloadSim" class="sim-pill-btn">🔄 Muat Ulang Tampilan</button>
+                                <a id="btnDirectPreview" href="#" target="_blank" class="sim-pill-btn">↗️ Buka Pratinjau Penuh</a>
+                            </div>
+                        </div>
+                        <div id="simViewport" class="simulator-viewport">
+                            <iframe id="previewFrame" class="preview-frame" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🌟 UJI RUMUS MATEMATIS KONTRAS WARNA W3C -->
+                <div class="contrast-section card">
+                    <div class="section-head">
+                        <span class="badge-feature">🔬 Analisis Matematis Luminansi Relatif</span>
+                        <h3>Pengujian Kontras Warna Teks vs Latar Belakang (WCAG 1.4.3)</h3>
+                        <p class="section-caption">Formula Resmi W3C: <code>(L1 + 0.05) / (L2 + 0.05)</code> • Standar Minimum Teks Normal = <strong>4.5:1</strong></p>
+                    </div>
+                    <div id="contrastGrid" class="contrast-grid"></div>
+                </div>
+
+                <!-- AKSI PRINT / UNDUH LAPORAN -->
+                <div class="actions-bar">
+                    <div class="filter-wrapper">
+                        <h3>Temuan Pelanggaran & Solusi Koding Otomatis</h3>
+                        <div class="issue-filter-pills">
+                            <button class="filter-pill active" data-filter="all">Semua Isu</button>
+                            <button class="filter-pill" data-filter="Critical">Kritis (Critical)</button>
+                            <button class="filter-pill" data-filter="Serious">Serius (Serious)</button>
+                            <button class="filter-pill" data-filter="Moderate">Moderat (Moderate)</button>
+                        </div>
+                    </div>
+                    <div class="export-actions">
+                        <button id="btnExportJson" class="btn-secondary">📥 Unduh Data JSON</button>
+                        <button id="btnPrint" class="btn-primary" style="padding: 10px 18px; font-size: 13px;">🖨️ Cetak PDF Resmi</button>
+                    </div>
+                </div>
+
+                <!-- TEMUAN PELANGGARAN DENGAN SOLUSI KODE SEBELUM-SESUDAH -->
+                <div class="issues-container">
+                    <div id="issuesList" class="issues-list"></div>
+                </div>
+
+                <!-- KRITERIA LOLOS -->
+                <div class="passed-container">
+                    <h4 class="section-subtitle passed-title">✅ Kriteria Aksesibilitas yang Berhasil Lolos:</h4>
+                    <div id="passedList" class="passed-list"></div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>© 2026 - 2027 <strong>A11yAuditor AI</strong> • Platform Audit Aksesibilitas Web Otomatis</p>
+            <p class="footer-author">Tugas Akhir Program Studi D3 Teknik Informatika • <strong>Adriel Gerald L. Tobing</strong></p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
