@@ -208,17 +208,25 @@ document.addEventListener('DOMContentLoaded', () => {
             renderFullAcademicReport(data);
             saveAuditToHistory(data);
 
-            // Muat preview simulator via injeksi srcdoc langsung
-            try {
-                const proxyUrl = `/api/preview?url=${encodeURIComponent(data.url)}`;
-                if (btnDirectPreview) btnDirectPreview.href = proxyUrl;
-                
-                const previewRes = await fetch(proxyUrl);
-                const previewHtml = await previewRes.text();
-                previewFrame.srcdoc = previewHtml;
-            } catch (errPrev) {
-                console.warn('Gagal memuat pratinjau:', errPrev);
-            }
+            // Buka hasil laporan langsung tanpa menunggu simulator (Instan!)
+            btnText.textContent = 'Jalankan Audit P.O.U.R';
+            btnLoader.style.display = 'none';
+            btnAudit.disabled = false;
+
+            // Muat preview simulator secara background (asinkron) agar UI tidak terhambat
+            const proxyUrl = `/api/preview?url=${encodeURIComponent(data.url)}`;
+            if (btnDirectPreview) btnDirectPreview.href = proxyUrl;
+            
+            fetch(proxyUrl)
+                .then(res => res.text())
+                .then(previewHtml => {
+                    previewFrame.srcdoc = previewHtml;
+                })
+                .catch(errPrev => {
+                    console.warn('Gagal memuat pratinjau:', errPrev);
+                });
+
+            return;
 
         } catch (err) {
             console.error(err);

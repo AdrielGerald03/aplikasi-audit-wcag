@@ -30,25 +30,35 @@ function getRandomUserAgent() {
     return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 }
 
+// Simple in-memory cache agar website yang baru di-audit langsung terbuka instan (0 detik)
+const auditCache = new Map();
+const CACHE_TTL = 10 * 60 * 1000; // simpan 10 menit
+
 // ==========================================
-// 1. SMART FETCH ENGINE: MULTI-FALLBACK (ANTI-BLOCK & GLOBAL WEB COMPATIBLE)
+// 1. SMART FETCH ENGINE: MULTI-FALLBACK (ULTRA-FAST & ANTI-BLOCK)
 // ==========================================
 async function fetchTargetWeb(rawUrl) {
     let clean = rawUrl.trim();
-    // Jika tidak ada skema http/https
     if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
         clean = clean.replace(/^\/+/, '');
     } else {
         clean = clean.replace(/^https?:\/\//i, '');
     }
 
-    // Susun daftar kandidat URL: coba https, www, http, dan fallback global
     const cleanNoWww = clean.replace(/^www\./i, '');
+    
+    // Cek cache terlebih dahulu
+    const cacheKey = cleanNoWww.toLowerCase();
+    const cached = auditCache.get(cacheKey);
+    if (cached && (Date.now() - cached.time < CACHE_TTL)) {
+        return cached.data;
+    }
+
+    // Urutan prioritas tercepat: langsung coba format aslinya lebih dulu
     const candidates = [
         `https://${clean}`,
         `https://www.${cleanNoWww}`,
-        `http://${clean}`,
-        `http://www.${cleanNoWww}`
+        `http://${clean}`
     ];
 
     let lastError = null;
@@ -58,32 +68,30 @@ async function fetchTargetWeb(rawUrl) {
             const response = await axios.get(target, {
                 headers: {
                     'User-Agent': getRandomUserAgent(),
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language': 'id,en-US;q=0.9,en;q=0.8',
-                    'Accept-Encoding': 'gzip, deflate, br',
-                    'Cache-Control': 'no-cache',
-                    'Upgrade-Insecure-Requests': '1',
-                    'Sec-Fetch-Dest': 'document',
-                    'Sec-Fetch-Mode': 'navigate',
-                    'Sec-Fetch-Site': 'none'
+                    'Cache-Control': 'no-cache'
                 },
                 httpsAgent: httpsAgent,
-                timeout: 15000,
-                maxRedirects: 10,
+                timeout: 6000, // Turunkan dari 15 detik ke 6 detik agar tidak kelamaan nunggu jika situs lambat
+                maxRedirects: 5,
                 validateStatus: function (status) {
-                    return status >= 200 && status < 400; // izinkan redirect dan response sukses
+                    return status >= 200 && status < 400;
                 }
             });
 
             if (response.data && typeof response.data === 'string' && response.data.includes('<')) {
-                return { html: response.data, finalUrl: target };
+                const result = { html: response.data, finalUrl: target };
+                // Simpan ke cache
+                auditCache.set(cacheKey, { time: Date.now(), data: result });
+                return result;
             }
         } catch (err) {
             lastError = err;
         }
     }
 
-    throw lastError || new Error('Gagal menghubungi situs web. Pastikan domain aktif dan terhubung ke internet.');
+    throw lastError || new Error('Gagal menghubungi situs web. Pastikan domain aktif.');
 }
 
 // ==========================================
