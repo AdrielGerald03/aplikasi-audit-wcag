@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cleanUrl = formatUrl(rawUrl);
         urlInput.value = cleanUrl;
 
-        btnText.textContent = 'Mengeksekusi Engine P.O.U.R...';
+        btnText.textContent = 'Menjalankan Analisis DOM...';
         btnLoader.style.display = 'inline-block';
         btnAudit.disabled = true;
 
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
             saveAuditToHistory(data);
 
             // Buka hasil laporan langsung tanpa menunggu simulator (Instan!)
-            btnText.textContent = 'Jalankan Audit P.O.U.R';
+            btnText.textContent = 'Jalankan Inspeksi WCAG';
             btnLoader.style.display = 'none';
             btnAudit.disabled = false;
 
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error(err);
             alert('Gagal menghubungi server audit di laptop.');
         } finally {
-            btnText.textContent = 'Jalankan Audit P.O.U.R';
+            btnText.textContent = 'Jalankan Inspeksi WCAG';
             btnLoader.style.display = 'none';
             btnAudit.disabled = false;
         }

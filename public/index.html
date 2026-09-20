@@ -31,14 +31,20 @@
     <header class="navbar">
         <div class="container nav-container">
             <div class="logo">
-                <span class="logo-icon">🌐</span>
+                <div class="logo-mark">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
                 <div>
-                    <span class="logo-title">A11yAuditor AI</span>
-                    <span class="logo-badge">WCAG 2.1 • W3C POUR Framework</span>
+                    <span class="logo-title">A11yInspector</span>
+                    <span class="logo-badge">W3C WCAG 2.1 • P.O.U.R Compliance Engine</span>
                 </div>
             </div>
             <div class="nav-author">
-                <span class="univ-tag">TUGAS AKHIR TEKNIK INFORMATIKA</span>
+                <span class="univ-tag">PROJECT TUGAS AKHIR • D3 TEKNIK INFORMATIKA</span>
                 <strong class="author-name">Adriel Gerald L. Tobing</strong>
             </div>
         </div>
@@ -48,38 +54,43 @@
         <!-- HERO SECTION -->
         <section class="hero-section">
             <div class="container hero-container">
-                <div class="tag-pill-container">
-                    <span class="tag-pill">🚀 Automated Web Accessibility Suite & Vision Simulator</span>
+                <div class="tech-spec-bar">
+                    <span class="spec-chip"><span class="chip-dot"></span> W3C WCAG 2.1 Specification</span>
+                    <span class="spec-chip">DOM Tree Inspector</span>
+                    <span class="spec-chip">Relative Luminance Formula</span>
+                    <span class="spec-chip">Strict POUR Evaluator</span>
                 </div>
-                <h1 class="hero-title">Audit Aksesibilitas Web Otomatis</h1>
+                <h1 class="hero-title">Automated Web Accessibility Auditor</h1>
                 <p class="hero-subtitle">
-                    Platform pengujian kepatuhan situs layanan publik terhadap standar internasional <strong>W3C WCAG 2.1 (Level A, AA, AAA)</strong>. Menginspeksi struktur pohon DOM, menghitung rasio luminansi kontras warna, dan membedah kepatuhan 4 pilar aksesibilitas <strong>P.O.U.R</strong> secara mendalam.
+                    Platform pengujian kepatuhan aksesibilitas web berbasis standar teknis <strong>W3C Web Content Accessibility Guidelines (WCAG 2.1 Level A, AA, AAA)</strong>. Menginspeksi pohon DOM secara otomatis, menghitung kontras luminansi relatif, dan memvalidasi prinsip <strong>Perceivable, Operable, Understandable,</strong> dan <strong>Robust</strong>.
                 </p>
 
                 <div class="audit-card">
                     <form id="auditForm" class="audit-form">
                         <div class="input-wrapper">
-                            <span class="input-icon">🔍</span>
-                            <input type="text" id="urlInput" placeholder="Masukkan URL situs web (contoh: wikipedia.org atau bps.go.id)" required>
+                            <span class="input-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </span>
+                            <input type="text" id="urlInput" placeholder="https://domain-target.com" required autocomplete="off" spellcheck="false">
                         </div>
                         <button type="submit" id="btnAudit" class="btn-primary">
-                            <span id="btnText">Jalankan Audit P.O.U.R</span>
+                            <span id="btnText">Jalankan Inspeksi WCAG</span>
                             <span id="btnLoader" class="loader-spinner" style="display: none;"></span>
                         </button>
                     </form>
                     <div class="quick-samples">
-                        <span>Pilih sampel cepat untuk diuji:</span>
+                        <span class="sample-label">Target Pengujian Publik:</span>
                         <div class="sample-tags">
-                            <button class="sample-btn" data-url="usu.ac.id">🎓 USU Medan (Kampus)</button>
-                            <button class="sample-btn" data-url="https://ui.ac.id">🎓 Univ. Indonesia</button>
-                            <button class="sample-btn" data-url="https://itb.ac.id">🎓 ITB Bandung</button>
-                            <button class="sample-btn" data-url="https://kemkes.go.id">🏥 Kemkes RI</button>
-                            <button class="sample-btn" data-url="https://bps.go.id">📊 BPS RI</button>
-                            <button class="sample-btn" data-url="https://kompas.com">📰 Kompas.com</button>
-                            <button class="sample-btn" data-url="https://detik.com">📰 Detik.com</button>
-                            <button class="sample-btn" data-url="https://wikipedia.org">📚 Wikipedia</button>
-                            <button class="sample-btn" data-url="https://w3.org">🌐 W3C Official</button>
-                            <button class="sample-btn" data-url="https://github.com">💻 GitHub</button>
+                            <button class="sample-btn" data-url="usu.ac.id">USU Medan</button>
+                            <button class="sample-btn" data-url="https://ui.ac.id">Univ. Indonesia</button>
+                            <button class="sample-btn" data-url="https://itb.ac.id">ITB Bandung</button>
+                            <button class="sample-btn" data-url="https://kemkes.go.id">Kemkes RI</button>
+                            <button class="sample-btn" data-url="https://bps.go.id">BPS RI</button>
+                            <button class="sample-btn" data-url="https://kompas.com">Kompas.com</button>
+                            <button class="sample-btn" data-url="https://detik.com">Detik.com</button>
+                            <button class="sample-btn" data-url="https://wikipedia.org">Wikipedia</button>
+                            <button class="sample-btn" data-url="https://w3.org">W3C Official</button>
+                            <button class="sample-btn" data-url="https://github.com">GitHub</button>
                         </div>
                     </div>
                 </div>
