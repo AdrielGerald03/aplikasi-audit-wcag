@@ -72,7 +72,98 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Cetak Laporan PDF
+    // Cetak Laporan PDF Resmi
+    if (btnPrint) {
+        btnPrint.addEventListener('click', () => {
+            window.print();
+        });
+    }
+
+    // 🌟 LOCAL STORAGE AUDIT HISTORY
+    const STORAGE_KEY = 'a11y_audit_history';
+    const historyTableBody = document.getElementById('historyTableBody');
+    const btnClearHistory = document.getElementById('btnClearHistory');
+
+    function getAuditHistory() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveAuditToHistory(data) {
+        let history = getAuditHistory();
+        // Cegah duplikasi persis sama
+        history = history.filter(item => item.url !== data.url);
+        history.unshift({
+            url: data.url,
+            score: data.summary.score,
+            grade: data.summary.grade,
+            conformance: data.summary.conformance,
+            timestamp: data.timestamp,
+            fullData: data
+        });
+        // Batasi 8 riwayat terakhir
+        if (history.length > 8) history.pop();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+        renderHistoryTable();
+    }
+
+    function renderHistoryTable() {
+        if (!historyTableBody) return;
+        const history = getAuditHistory();
+        if (history.length === 0) {
+            historyTableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">Belum ada riwayat audit tersimpan. Jalankan audit pertama kamu di atas!</td>
+                </tr>
+            `;
+            return;
+        }
+
+        historyTableBody.innerHTML = '';
+        history.forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            let scoreClass = 'history-score-low';
+            if (item.score >= 80) scoreClass = 'history-score-high';
+            else if (item.score >= 60) scoreClass = 'history-score-mid';
+
+            tr.innerHTML = `
+                <td style="font-weight: 700; color: #64748b;">${idx + 1}</td>
+                <td><strong style="color: #0f172a;">${item.url}</strong></td>
+                <td style="color: #64748b; font-size: 12px;">${item.timestamp}</td>
+                <td><span class="history-score-badge ${scoreClass}">${item.score}/100 (Grade ${item.grade})</span></td>
+                <td><small style="font-weight: 700; color: #334155;">${item.conformance}</small></td>
+                <td>
+                    <button class="btn-history-load" data-index="${idx}">Buka Ulang</button>
+                </td>
+            `;
+            historyTableBody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.btn-history-load').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = e.target.getAttribute('data-index');
+                const history = getAuditHistory();
+                if (history[index] && history[index].fullData) {
+                    renderFullAcademicReport(history[index].fullData);
+                }
+            });
+        });
+    }
+
+    if (btnClearHistory) {
+        btnClearHistory.addEventListener('click', () => {
+            if (confirm('Hapus seluruh riwayat komparasi audit?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                renderHistoryTable();
+            }
+        });
+    }
+
+    // Inisialisasi awal tabel riwayat
+    renderHistoryTable();
 
     // Smart auto-formatter URL: default https:// (Secure)
     function formatUrl(input) {
@@ -115,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             renderFullAcademicReport(data);
+            saveAuditToHistory(data);
 
             // Muat preview simulator via injeksi srcdoc langsung
             try {
@@ -147,7 +239,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('executiveSummary').textContent = data.summary.insight;
         document.getElementById('conformanceBadge').textContent = data.summary.conformance;
         document.getElementById('auditTime').textContent = data.timestamp;
-        document.getElementById('totalElements').textContent = `${data.summary.stats.totalImages} gambar, ${data.summary.stats.totalLinks} link, ${data.summary.stats.totalInputs} input, ${data.summary.stats.totalHeadings} heading`;
+        
+        const stats = data.summary.stats;
+        document.getElementById('totalElements').textContent = `${stats.totalImages} gambar, ${stats.totalVideos || 0} video, ${stats.totalTables || 0} tabel, ${stats.totalLinks} link, ${stats.totalInputs} input`;
 
         // Skor & Grade
         const score = data.summary.score;
@@ -156,6 +250,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const gradeBadge = document.getElementById('gradeBadge');
         gradeBadge.textContent = `Grade ${data.summary.grade}`;
         gradeBadge.className = `grade-badge grade-${data.summary.grade.toLowerCase()}`;
+
+        // 🌟 Lembar Berita Acara Resmi
+        const certTargetUrl = document.getElementById('certTargetUrl');
+        const certTimestamp = document.getElementById('certTimestamp');
+        const certRecommendation = document.getElementById('certRecommendation');
+
+        if (certTargetUrl) certTargetUrl.textContent = data.url;
+        if (certTimestamp) certTimestamp.textContent = data.timestamp;
+        if (certRecommendation) {
+            let kelayakan = 'DITOLAK / TIDAK LAYAK (Wajib Perbaikan Darurat)';
+            if (score >= 80) kelayakan = 'SANGAT LAYAK (Standar Aksesibilitas Internasional W3C Terpenuhi)';
+            else if (score >= 60) kelayakan = 'LAYAK DENGAN CATATAN (Dibutuhkan Perbaikan Ringan pada Kontras/Navigasi)';
+            certRecommendation.innerHTML = `<strong style="color: ${score >= 60 ? '#059669' : '#dc2626'}">${kelayakan}</strong>`;
+        }
 
         // 🌟 4 PILAR WCAG P.O.U.R PROGRESS BARS
         const pour = data.summary.pourAnalysis;

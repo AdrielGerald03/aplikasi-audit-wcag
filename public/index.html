@@ -243,6 +243,84 @@
                     <div id="passedList" class="passed-list"></div>
                 </div>
 
+                <!-- 🌟 LEMBAR BERITA ACARA RESMI & TANDA TANGAN AUDITOR (TAMPIL DI CETAK PDF) -->
+                <div class="official-certificate-card card">
+                    <div class="cert-header">
+                        <div class="cert-emblem">⚖️</div>
+                        <div>
+                            <h3 class="cert-title">BERITA ACARA AUDIT AKSESIBILITAS WEB DIGITAL</h3>
+                            <p class="cert-subtitle">Lampiran Resmi Pengujian Kualitas Perangkat Lunak Berdasarkan Standar W3C WCAG 2.1</p>
+                        </div>
+                    </div>
+                    <div class="cert-body">
+                        <table class="cert-table">
+                            <tr>
+                                <td><strong>Nama Website Diuji</strong></td>
+                                <td id="certTargetUrl">-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tanggal & Waktu Audit</strong></td>
+                                <td id="certTimestamp">-</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Metodologi Pengujian</strong></td>
+                                <td>Inspeksi Otomatis Pohon DOM & Formula Luminansi Relatif W3C (4 Pilar P.O.U.R)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status & Rekomendasi Kelayakan</strong></td>
+                                <td id="certRecommendation">-</td>
+                            </tr>
+                        </table>
+
+                        <div class="cert-signature-grid">
+                            <div class="cert-sig-box">
+                                <span class="sig-role">Verifikasi Sistem</span>
+                                <div class="sig-seal">TERVERIFIKASI DIGITAL<br><span>A11yAuditor Engine v3.5</span></div>
+                                <span class="sig-note">Integritas Standar Internasional W3C</span>
+                            </div>
+                            <div class="cert-sig-box">
+                                <span class="sig-role">Auditor Aksesibilitas / Peneliti</span>
+                                <div class="sig-line"></div>
+                                <strong class="sig-name">Adriel Gerald L. Tobing</strong>
+                                <span class="sig-info">Pengembang Platform & Mahasiswa D3 Teknik Informatika</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 🌟 RIWAYAT AUDIT & KOMPARASI CEPAT (AUDIT HISTORY) -->
+        <section id="historySection" class="history-section container">
+            <div class="card history-card">
+                <div class="history-header">
+                    <div>
+                        <span class="badge-feature">📋 Data Riset Skripsi</span>
+                        <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 4px;">Riwayat Audit & Komparasi Aksesibilitas Terakhir</h3>
+                        <p style="font-size: 13px; color: #64748b;">Daftar perbandingan skor kepatuhan beberapa situs yang telah diuji (tersimpan otomatis untuk bahan laporan Bab 4 Skripsi):</p>
+                    </div>
+                    <button id="btnClearHistory" class="sim-pill-btn" style="color: #ef4444; border-color: #fecdd3;">🗑️ Hapus Riwayat</button>
+                </div>
+                <div class="history-table-wrapper">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Alamat Website Publik</th>
+                                <th>Waktu Pengujian</th>
+                                <th>Skor Kepatuhan</th>
+                                <th>Akreditasi WCAG</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">Belum ada riwayat audit tersimpan. Jalankan audit pertama kamu di atas!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </main>

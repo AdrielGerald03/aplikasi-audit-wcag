@@ -31,18 +31,24 @@ function getRandomUserAgent() {
 }
 
 // ==========================================
-// 1. SMART FETCH ENGINE: MULTI-FALLBACK (ANTI-BLOCK & AUTO WWW)
+// 1. SMART FETCH ENGINE: MULTI-FALLBACK (ANTI-BLOCK & GLOBAL WEB COMPATIBLE)
 // ==========================================
 async function fetchTargetWeb(rawUrl) {
-    let clean = rawUrl.trim().toLowerCase();
-    clean = clean.replace(/^https?:\/\//, ''); // buang protokol dulu
+    let clean = rawUrl.trim();
+    // Jika tidak ada skema http/https
+    if (!clean.startsWith('http://') && !clean.startsWith('https://')) {
+        clean = clean.replace(/^\/+/, '');
+    } else {
+        clean = clean.replace(/^https?:\/\//i, '');
+    }
 
-    // Susun daftar kandidat URL: prioritaskan https:// (Aman) terlebih dahulu
+    // Susun daftar kandidat URL: coba https, www, http, dan fallback global
+    const cleanNoWww = clean.replace(/^www\./i, '');
     const candidates = [
         `https://${clean}`,
-        `https://www.${clean.replace(/^www\./, '')}`,
+        `https://www.${cleanNoWww}`,
         `http://${clean}`,
-        `http://www.${clean.replace(/^www\./, '')}`
+        `http://www.${cleanNoWww}`
     ];
 
     let lastError = null;
@@ -52,13 +58,21 @@ async function fetchTargetWeb(rawUrl) {
             const response = await axios.get(target, {
                 headers: {
                     'User-Agent': getRandomUserAgent(),
-                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
                     'Accept-Language': 'id,en-US;q=0.9,en;q=0.8',
-                    'Cache-Control': 'no-cache'
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Cache-Control': 'no-cache',
+                    'Upgrade-Insecure-Requests': '1',
+                    'Sec-Fetch-Dest': 'document',
+                    'Sec-Fetch-Mode': 'navigate',
+                    'Sec-Fetch-Site': 'none'
                 },
                 httpsAgent: httpsAgent,
-                timeout: 12000,
-                maxRedirects: 8
+                timeout: 15000,
+                maxRedirects: 10,
+                validateStatus: function (status) {
+                    return status >= 200 && status < 400; // izinkan redirect dan response sukses
+                }
             });
 
             if (response.data && typeof response.data === 'string' && response.data.includes('<')) {
@@ -66,11 +80,10 @@ async function fetchTargetWeb(rawUrl) {
             }
         } catch (err) {
             lastError = err;
-            // Lanjut mencoba kandidat berikutnya secara otomatis
         }
     }
 
-    throw lastError || new Error('Gagal menghubungi website target.');
+    throw lastError || new Error('Gagal menghubungi situs web. Pastikan domain aktif dan terhubung ke internet.');
 }
 
 // ==========================================
@@ -222,6 +235,61 @@ function auditAccessibility(html, targetUrl) {
             pillar: 'Perceivable',
             title: 'Rasio Kontras Luminansi Lolos Standar',
             description: 'Sampel elemen teks memenuhi rasio kontras minimal 4.5:1 untuk teks normal.'
+        });
+    }
+
+    // 🌟 WCAG 1.2.2 Ketersediaan Teks Terjemahan / Subtitle Video (Captions Prerecorded)
+    const videos = $('video');
+    const iframes = $('iframe[src*="youtube"], iframe[src*="vimeo"]');
+    let videoWithoutCaptions = 0;
+
+    videos.each((i, el) => {
+        const hasTrack = $(el).find('track[kind="subtitles"], track[kind="captions"]').length > 0;
+        if (!hasTrack) {
+            videoWithoutCaptions++;
+            recordCheck('perceivable', false);
+        } else {
+            recordCheck('perceivable', true);
+        }
+    });
+
+    if (videos.length > 0 && videoWithoutCaptions > 0) {
+        issues.push({
+            code: 'WCAG 1.2.2 (Level A)',
+            pillar: 'Perceivable',
+            title: `Elemen Video Tanpa Subtitle / Closed-Captions (${videoWithoutCaptions} video)`,
+            severity: 'Critical',
+            impact: 'Penyandang disabilitas tunarungu (tuli) tidak dapat memahami narasi atau percakapan suara di dalam video.',
+            recommendation: "Sematkan tag <track kind='captions' src='subtitle.vtt' srclang='id' label='Bahasa Indonesia'> di dalam elemen <video>.",
+            codeSnippet: `<video controls src="profil-dinas.mp4"></video>`,
+            fixSnippet: `<video controls src="profil-dinas.mp4">\n  <track kind="captions" src="subtitles-id.vtt" srclang="id" label="Bahasa Indonesia" default>\n</video>`
+        });
+    } else if (videos.length > 0) {
+        passed.push({
+            code: 'WCAG 1.2.2 (Level A)',
+            pillar: 'Perceivable',
+            title: 'Konten Multimedia Dilengkapi Closed-Captions',
+            description: `Seluruh elemen video (${videos.length} video) memiliki tag subtitle pendukung tunarungu.`
+        });
+    }
+
+    // Periksa iframe video tanpa title deskriptif
+    let iframeNoTitle = 0;
+    iframes.each((i, el) => {
+        const title = $(el).attr('title');
+        if (!title || title.trim() === '') iframeNoTitle++;
+    });
+    if (iframeNoTitle > 0) {
+        recordCheck('perceivable', false);
+        issues.push({
+            code: 'WCAG 4.1.2 / 1.2.2 (Level A)',
+            pillar: 'Perceivable',
+            title: `Penyematan Video Iframe Tanpa Atribut Title Aksesibel (${iframeNoTitle} frame)`,
+            severity: 'Moderate',
+            impact: 'Screen reader tidak dapat mengumumkan konteks video yang tertanam pada iframe pihak ketiga.',
+            recommendation: "Sematkan atribut title='...' yang jelas pada tag <iframe> pemutar video.",
+            codeSnippet: `<iframe src="https://www.youtube.com/embed/xyz"></iframe>`,
+            fixSnippet: `<iframe src="https://www.youtube.com/embed/xyz" title="Video Profil Pelayanan Publik"></iframe>`
         });
     }
 
@@ -387,6 +455,41 @@ function auditAccessibility(html, targetUrl) {
         });
     }
 
+    // 🌟 WCAG 1.3.1 Data Tables Accessibility (Header & Scope untuk Screen Reader)
+    const tables = $('table');
+    let tablesWithoutHeaders = 0;
+
+    tables.each((i, el) => {
+        const hasTh = $(el).find('th').length > 0;
+        const hasScope = $(el).find('[scope]').length > 0;
+        if (!hasTh && !hasScope) {
+            tablesWithoutHeaders++;
+            recordCheck('robust', false);
+        } else {
+            recordCheck('robust', true);
+        }
+    });
+
+    if (tables.length > 0 && tablesWithoutHeaders > 0) {
+        issues.push({
+            code: 'WCAG 1.3.1 (Level A)',
+            pillar: 'Robust',
+            title: `Tabel Data Statistik Tanpa Tag Header <th> (${tablesWithoutHeaders} tabel)`,
+            severity: 'Serious',
+            impact: 'Screen reader membacakan deretan angka dan teks tabel tanpa konteks judul kolom yang jelas bagi tunanetra.',
+            recommendation: "Gunakan tag <th> dengan atribut scope='col' atau scope='row' pada setiap judul kolom dan baris tabel.",
+            codeSnippet: `<table>\n  <tr><td>No</td><td>Nama Layanan</td></tr>\n</table>`,
+            fixSnippet: `<table>\n  <thead>\n    <tr><th scope="col">No</th><th scope="col">Nama Layanan</th></tr>\n  </thead>\n</table>`
+        });
+    } else if (tables.length > 0) {
+        passed.push({
+            code: 'WCAG 1.3.1 (Level A)',
+            pillar: 'Robust',
+            title: 'Struktur Tabel Data Memiliki Header Aksesibel',
+            description: `Seluruh tabel data (${tables.length} tabel) telah terstruktur rapi dengan elemen <th>.`
+        });
+    }
+
     // Hitung persentase pilar P.O.U.R
     const radarData = {};
     let calculatedTotalScore = 0;
@@ -430,6 +533,8 @@ function auditAccessibility(html, targetUrl) {
             pourAnalysis: radarData,
             stats: {
                 totalImages: images.length,
+                totalVideos: $('video, iframe[src*="youtube"], iframe[src*="vimeo"]').length,
+                totalTables: $('table').length,
                 totalLinks: $('a').length,
                 totalInputs: inputs.length,
                 totalHeadings: $('h1, h2, h3, h4, h5, h6').length
